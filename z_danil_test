@@ -1,0 +1,13 @@
+*&---------------------------------------------------------------------*
+*& Report Z_DATIL_TEST
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_danil_test.
+
+INCLUDE z_danil_test_top.
+INCLUDE z_danil_test_ssc.
+INCLUDE z_danil_test_lcl_model.
+INCLUDE z_danil_test_lcl_view.
+INCLUDE z_danil_test_lcl.
+INCLUDE z_danil_test_evt.

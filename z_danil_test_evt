@@ -1,0 +1,15 @@
+*&---------------------------------------------------------------------*
+*&  Include           Z_DANIL_TEST_EVT
+*&---------------------------------------------------------------------*
+
+START-OF-SELECTION.
+
+  gs_params = VALUE #( bukrs = s_bukrs[]
+                       banfn = s_banfn[]
+                       ebeln = s_ebeln[]
+                       belnr = s_belnr[] ).
+
+  go_controllerl = NEW #( io_model = NEW lcl_model( is_params = gs_params )
+                          io_view  = NEW lcl_view( ) ).
+
+  go_controllerl->run( ).

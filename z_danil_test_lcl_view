@@ -1,0 +1,77 @@
+*&---------------------------------------------------------------------*
+*&  Include           Z_DANIL_TEST_LCL_VIEW
+*&---------------------------------------------------------------------*
+*&
+*&  Этот класс я бы делал глобальным. Сейчас реализую локально лишь для того что бы проще было скопировать разработку.
+*&
+*&---------------------------------------------------------------------*
+
+CLASS lcl_view DEFINITION.
+
+  PUBLIC SECTION.
+
+    METHODS:
+      set_table IMPORTING itd_alv_table TYPE gtt_alv_table,
+      show_alv.
+
+  PRIVATE SECTION.
+    METHODS handle FOR EVENT double_click OF cl_salv_events_table IMPORTING row column.
+
+    DATA: mtd_alv_table TYPE gtt_alv_table,
+          mo_alv        TYPE REF TO cl_salv_table.
+
+ENDCLASS.
+
+CLASS lcl_view IMPLEMENTATION.
+
+  METHOD set_table.
+    mtd_alv_table = itd_alv_table.
+  ENDMETHOD.
+
+  METHOD show_alv.
+    TRY.
+        cl_salv_table=>factory( EXPORTING list_display = if_salv_c_bool_sap=>false
+                                IMPORTING r_salv_table = mo_alv
+                                CHANGING  t_table      = mtd_alv_table ).
+
+        DATA(lo_event) = mo_alv->get_event( ).
+        SET HANDLER handle FOR lo_event.
+        mo_alv->display( ).
+      CATCH cx_salv_msg.
+        MESSAGE 'Ошибка при создании ALV' TYPE 'I' DISPLAY LIKE 'E'.  "В обычных условиях я бы создал класс сообщений.
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD handle.
+    CONSTANTS: lc_banfn TYPE char5 VALUE 'BANFN',
+               lc_ebeln TYPE char5 VALUE 'EBELN',
+               lc_belnr TYPE char5 VALUE 'BELNR'.
+
+    CASE column.
+      WHEN lc_banfn.
+        READ TABLE mtd_alv_table ASSIGNING FIELD-SYMBOL(<ls_alv_line>)
+                                 INDEX row.
+        IF sy-subrc IS INITIAL.
+          SET PARAMETER ID 'BAN' FIELD <ls_alv_line>-banfn.
+          CALL TRANSACTION 'ME53N' AND SKIP FIRST SCREEN.
+        ENDIF.
+      WHEN lc_ebeln.
+        READ TABLE mtd_alv_table ASSIGNING <ls_alv_line>
+                                 INDEX row.
+        IF sy-subrc IS INITIAL.
+          SET PARAMETER ID 'BSN' FIELD <ls_alv_line>-ebeln.
+          CALL TRANSACTION 'ME23N' AND SKIP FIRST SCREEN.
+        ENDIF.
+      WHEN lc_belnr.
+        READ TABLE mtd_alv_table ASSIGNING <ls_alv_line>
+                                 INDEX row.
+        IF sy-subrc IS INITIAL.
+          SET PARAMETER ID 'BLN' FIELD <ls_alv_line>-belnr.
+          SET PARAMETER ID 'BUK' FIELD <ls_alv_line>-bukrs.
+          CALL TRANSACTION 'FB03' AND SKIP FIRST SCREEN.
+        ENDIF.
+    ENDCASE.
+  ENDMETHOD.
+
+ENDCLASS.

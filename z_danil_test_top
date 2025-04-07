@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*&  Include           Z_DANIL_TEST_TOP
+*&---------------------------------------------------------------------*
+TYPES: BEGIN OF gts_params,
+         bukrs TYPE RANGE OF ekko-bukrs,
+         banfn TYPE RANGE OF eban-banfn,
+         ebeln TYPE RANGE OF ekko-ebeln,
+         belnr TYPE RANGE OF rbkp-belnr,
+       END OF gts_params.
+
+CLASS lcl_controller DEFINITION DEFERRED.
+
+DATA: gs_params TYPE gts_params,
+      go_controllerl type REF TO lcl_controller.
+
+TABLES: ekko, eban, rbkp.
+
+*>------------------------------------------------------------------------------------------------------------------------------------------*
+
+" Я бы просто сделал глобальные структуру и тип таблицы.
+TYPES: BEGIN OF gts_alv_table,
+         bukrs      TYPE ekko-bukrs,          "БЕ
+         banfn      TYPE eban-banfn,          "Номер заявки
+         bnfpo      TYPE eban-bnfpo,          "Позиция заявки
+         matnr      TYPE eban-matnr,          "Материал
+         menge_eban TYPE eban-menge,          "Объем заявки
+         ebeln      TYPE ekko-ebeln,          "Номер заказа
+         ebelp      TYPE ekpo-ebelp,          "Позиция заказа
+         menge_ekpo TYPE ekpo-menge,          "Количество в заказе
+         belnr      TYPE rbkp-belnr,          "Номер фактуры
+         buzei      TYPE rseg-buzei,          "Позиция фактуры
+         menge_rseg TYPE rseg-menge,          "Количество в фактуре
+         shkzg      TYPE rseg-shkzg,          "Дебет/кредит
+       END OF gts_alv_table.
+
+TYPES: gtt_alv_table TYPE STANDARD TABLE OF gts_alv_table WITH DEFAULT KEY.
+
+*<------------------------------------------------------------------------------------------------------------------------------------------*

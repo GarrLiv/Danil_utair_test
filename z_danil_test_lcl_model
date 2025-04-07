@@ -1,0 +1,88 @@
+*&---------------------------------------------------------------------*
+*&  Include           Z_DANIL_TEST_LCL_MODEL
+*&---------------------------------------------------------------------*
+*&
+*&  Этот класс я бы делал глобальным. Сейчас реализую локально лишь для того что бы проще было скопировать разработку.
+*&
+*&---------------------------------------------------------------------*
+
+CLASS lcl_model DEFINITION.
+  PUBLIC SECTION.
+
+    METHODS: constructor
+      IMPORTING is_params TYPE gts_params,
+      get_main_data
+        RETURNING VALUE(rtd_alv_tab) TYPE gtt_alv_table
+        RAISING   zcx_error.
+
+  PRIVATE SECTION.
+
+    METHODS: get_data
+      RETURNING VALUE(rtd_alv_tab) TYPE gtt_alv_table
+      RAISING   zcx_error.
+
+    DATA: mtd_alv_table TYPE gtt_alv_table,
+          ms_params     TYPE gts_params.
+
+ENDCLASS.
+
+CLASS lcl_model IMPLEMENTATION.
+
+  METHOD constructor.
+
+    ms_params = is_params.
+
+  ENDMETHOD.
+
+  METHOD get_main_data.
+
+    mtd_alv_table = get_data( ).
+
+    LOOP AT mtd_alv_table ASSIGNING FIELD-SYMBOL(<ls_alv_tab>).
+
+      CHECK <ls_alv_tab>-shkzg < 0.
+      <ls_alv_tab>-menge_rseg = <ls_alv_tab>-menge_rseg * -1.
+
+    ENDLOOP.
+
+    rtd_alv_tab = mtd_alv_table.
+
+  ENDMETHOD.
+
+  METHOD get_data.
+    CONSTANTS: lc_storno TYPE eloek VALUE 'L'.
+
+    SELECT eban~banfn,
+           eban~bnfpo,
+           eban~matnr,
+           eban~menge AS menge_eban,
+           ekko~bukrs,
+           ekko~ebeln,
+           ekpo~ebelp,
+           ekpo~menge AS menge_ekpo,
+           rseg~belnr,
+           rseg~buzei,
+           rseg~menge AS menge_rseg,
+           rseg~shkzg
+    FROM eban INNER JOIN ekko ON eban~ebeln = ekko~ebeln
+              INNER JOIN ekpo ON ekpo~ebeln = ekko~ebeln
+                             AND eban~ebelp = ekpo~ebelp
+              LEFT  JOIN rbkp ON rbkp~belnr = ekko~ebeln
+              LEFT  JOIN rseg ON rseg~ebelp = ekpo~ebelp
+   WHERE ekko~bukrs IN @ms_params-bukrs
+     AND eban~banfn IN @ms_params-banfn
+     AND ekko~ebeln IN @ms_params-ebeln
+     AND rseg~belnr IN @ms_params-belnr
+     AND eban~loekz NE @lc_storno
+     AND ekko~loekz NE @lc_storno
+     AND ekpo~loekz NE @lc_storno
+    INTO CORRESPONDING FIELDS OF TABLE @mtd_alv_table.
+
+    IF sy-subrc IS NOT INITIAL.
+      MESSAGE 'Данных по заданым критериям нет' TYPE 'I' DISPLAY LIKE 'E'.
+      RAISE EXCEPTION TYPE zcx_error.
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.

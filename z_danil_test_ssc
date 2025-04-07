@@ -1,0 +1,9 @@
+*&---------------------------------------------------------------------*
+*&  Include           Z_DANIL_TEST_SSC
+*&---------------------------------------------------------------------*
+
+SELECT-OPTIONS:
+  s_bukrs FOR ekko-bukrs,
+  s_banfn FOR eban-banfn,
+  s_ebeln FOR ekko-ebeln,
+  s_belnr FOR rbkp-belnr.

@@ -1,0 +1,44 @@
+*&---------------------------------------------------------------------*
+*&  Include           Z_DANIL_TEST
+*&---------------------------------------------------------------------*
+*&
+*&  Этот класс я бы делал глобальным. Сейчас реализую локально лишь для того что бы проще было скопировать разработку.
+*&
+*&---------------------------------------------------------------------*
+
+CLASS lcl_controller DEFINITION.
+  PUBLIC SECTION.
+
+    METHODS: constructor
+      IMPORTING io_model TYPE REF TO lcl_model
+                io_view  TYPE REF TO lcl_view,
+      run.
+
+  PRIVATE SECTION.
+    DATA: mo_model TYPE REF TO lcl_model,
+          mo_view  TYPE REF TO lcl_view.
+
+ENDCLASS.
+
+CLASS lcl_controller IMPLEMENTATION.
+
+  METHOD constructor.
+
+    mo_model = io_model.
+    mo_view  = io_view.
+
+  ENDMETHOD.
+
+  METHOD run.
+
+    TRY.
+        mo_view->set_table( itd_alv_table = mo_model->get_main_data( ) ).
+        mo_view->show_alv( ).
+      CATCH cx_sy_create_object_error.
+      CATCH zcx_error.
+        return.
+    ENDTRY.
+
+  ENDMETHOD.
+
+ENDCLASS.
